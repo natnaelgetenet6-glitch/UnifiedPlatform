@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UniManage - Pharmacy Dashboard</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+        <main class="main-content">
+            <header class="topbar"></header>
+            <div class="content-wrapper">
+                <div class="dashboard-grid four-col">
+                    <div class="card stat-card blue">
+                        <div class="info">
+                            <h4>Today's Sales</h4>
+                            <p id="ph-today-sales">0</p>
+                        </div>
+                    </div>
+                        <div class="card stat-card teal">
+                            <div class="info">
+                                <h4>1-Month Sales</h4>
+                                <p id="ph-1m-sales">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card cyan">
+                            <div class="info">
+                                <h4>3-Month Sales</h4>
+                                <p id="ph-3m-sales">0</p>
+                            </div>
+                        </div>
+                    <div class="card stat-card green">
+                        <div class="info">
+                            <h4>Weekly Sales</h4>
+                            <p id="ph-weekly-sales">0</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card purple">
+                        <div class="info">
+                            <h4>Monthly Sales</h4>
+                            <p id="ph-monthly-sales">0</p>
+
+                    <div class="card">
+                        <h3>Profit Summary</h3>
+                        <div style="display:flex; gap:20px;">
+                            <div>1 Month Profit: <strong id="ph-1m-profit">$0</strong></div>
+                            <div>3 Month Profit: <strong id="ph-3m-profit">$0</strong></div>
+                            <div>Stock Value: <strong id="ph-stock-value">$0</strong></div>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                    <div class="card stat-card orange">
+                        <div class="info">
+                            <h4>Low Stock</h4>
+                            <p id="ph-low-stock">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Sales & Profit (Top Items)</h3>
+                    <div class="css-chart-container" id="ph-profit-chart"
+                        style="align-items: flex-end; gap: 20px; padding: 20px;">
+                        <!-- Chart bars injected by JS -->
+                        <p style="width:100%; text-align:center; color:#ccc;">No Data Yet</p>
+                    </div>
+                </div>
+
+                <div class="action-bar" style="margin-top: 2rem;">
+                    <a href="pos.html" class="btn-primary">Go to Point of Sale</a>
+                    <a href="stock.html" class="btn-secondary" style="margin-left:10px">Manage Stock</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../../assets/js/store.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/layout.js"></script>
+    <script src="script.js"></script>
+    <script>window.PharmacyModule.initDashboard();</script>
+</body>
+
+</html>

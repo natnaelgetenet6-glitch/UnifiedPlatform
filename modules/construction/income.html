@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UniManage - Log Income</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+        <main class="main-content">
+            <header class="topbar"></header>
+            <div class="content-wrapper">
+                <div class="form-container card">
+                    <h3>Log Income / Rent</h3>
+                    <form>
+                        <div class="form-group"><label>Source / Unit</label><input type="text" name="desc" required>
+                        </div>
+                        <div class="form-group"><label>Amount</label><input type="number" name="amount" required
+                                step="0.01"></div>
+                        <div class="form-group"><label>Date</label><input type="date" name="date" required></div>
+                        <button type="submit" class="btn-success">Record Income</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../../assets/js/store.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/layout.js"></script>
+    <script src="script.js"></script>
+    <script>window.ConstructionModule.initForm('income');</script>
+</body>
+
+</html>

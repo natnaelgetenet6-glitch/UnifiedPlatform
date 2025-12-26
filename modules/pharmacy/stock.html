@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UniManage - Pharmacy Stock</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+        <main class="main-content">
+            <header class="topbar"></header>
+            <div class="content-wrapper">
+                <div class="action-bar">
+                    <button id="add-new-item-btn" class="btn-primary" onclick="window.openStockModal()">+ Add New Item</button>
+                </div>
+                <div class="card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Buy Price</th>
+                                <th>Sell Price</th>
+                                <th>Qty</th>
+                                <th>Manufacture</th>
+                                <th>Expiry</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pharmacy-stock-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-container" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Title</h2>
+            <div id="modal-body">
+                        <form id="stock-form">
+                    <input type="hidden" id="st-id">
+                            <div class="form-group"><label>Description</label><textarea id="st-description" rows="2" placeholder="Optional item description"></textarea></div>
+                    <div class="form-group"><label>Name</label><input type="text" id="st-name" required></div>
+                        <div class="form-group"><label>Buy Price (Cost)</label><input type="number" id="st-price" required
+                            step="0.01"></div>
+                        <div class="form-group"><label>Sell Price</label><input type="number" id="st-sell-price" required
+                            step="0.01"></div>
+                        <div class="form-group"><label>Unit Type</label>
+                        <select id="st-unit-type">
+                            <option value="pcs">Pieces (pcs)</option>
+                            <option value="box">Box</option>
+                            <option value="liquid">Liquid (L)</option>
+                        </select>
+                        </div>
+                        <div class="form-group" id="pieces-per-box-row"><label>Pieces Per Box</label><input type="number" id="st-pieces-per-box" value="1" min="1"></div>
+                        <div class="form-group"><label>Qty to Add</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="number" id="st-qty" value="0" required step="1">
+                            <select id="st-qty-unit"><option value="base">Base unit</option><option value="boxes">Boxes</option></select>
+                        </div>
+                        </div>
+                        <div class="form-group"><label>Manufacture Date</label><input type="date" id="st-manuf"></div>
+                        <div class="form-group"><label>Expiry Date</label><input type="date" id="st-expiry"></div>
+                    <button type="submit" class="btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/store.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/layout.js"></script>
+    <script>
+        (function(){
+            const btn = document.getElementById('add-new-item-btn');
+            const u = (window.Auth && window.Auth.currentUser) ? window.Auth.currentUser : null;
+            if (!u || u.role !== 'admin') { if (btn) btn.style.display = 'none'; }
+        })();
+    </script>
+    <script src="script.js"></script>
+    <script>window.PharmacyModule.initStock();</script>
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UniManage - Exchange Holdings</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+        <main class="main-content">
+            <header class="topbar"></header>
+            <div class="content-wrapper">
+
+                <div class="page-header"
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2>Currency Holdings</h2>
+                        <p style="color: #64748b; margin-top: 5px;">Current stock of foreign currencies available for
+                            sale.</p>
+                    </div>
+                    <div class="action-bar">
+                        <a href="buy.html" class="btn-primary">Record Buy (Stock In)</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Currency</th>
+                                <th>Total Purchased</th>
+                                <th>Total Sold</th>
+                                <th>Current Holding</th>
+                                <th>Avg Buy Rate</th>
+                                <th>Est. Value (USD)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holdings-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Lots Modal -->
+                <div id="lots-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <span class="close-modal" onclick="document.getElementById('lots-modal').classList.add('hidden')">&times;</span>
+                        <h3 id="lots-modal-title">Lot History</h3>
+                        <div id="lots-modal-body">
+                            <!-- lot rows go here -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    <script src="../../assets/js/store.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/layout.js"></script>
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.ExchangeModule.initStock();
+        });
+    </script>
+</body>
+
+</html>

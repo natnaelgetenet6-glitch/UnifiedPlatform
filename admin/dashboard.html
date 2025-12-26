@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniManage - Admin Overview</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar container (filled by layout.js) -->
+        <aside class="sidebar"></aside>
+
+        <main class="main-content">
+            <!-- Topbar container (filled by layout.js) -->
+            <header class="topbar"></header>
+
+            <div class="content-wrapper">
+
+                <!-- Global Stats "Big Cards" Grid -->
+                <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+
+                    <!-- Exchange Overview -->
+                    <div class="card stat-card blue" id="card-exchange" style="flex-direction: column; align-items: flex-start; cursor:pointer;" title="Go to Exchange">
+                        <div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
+                            <div class="icon" style="font-size:2.5rem; margin-right:15px;">💱</div>
+                            <div>
+                                <h3 style="margin:0; font-size:1.1rem; color:#64748b;">Exchange Overview</h3>
+                                <p id="stat-exchange-total" style="font-size:1.2rem; margin:0;">Total Vol: $0</p>
+                            </div>
+                        </div>
+                        <div
+                            style="display:flex; justify-content:space-between; width:100%; margin-top:10px; border-top:1px solid #e2e8f0; padding-top:10px;">
+                            <div>
+                                <small style="color:#64748b; font-weight:600;">TOTAL BUY</small>
+                                <p id="stat-exchange-buy" style="margin:0; font-size:1.3rem; color:#1e293b;">$0</p>
+                            </div>
+                            <div style="text-align:right;">
+                                <small style="color:#64748b; font-weight:600;">TOTAL SELL</small>
+                                <p id="stat-exchange-sell" style="margin:0; font-size:1.3rem; color:#1e293b;">$0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Construction Overview -->
+                    <div class="card stat-card orange" id="card-construction" style="flex-direction: column; align-items: flex-start; cursor:pointer;" title="Go to Construction">
+                        <div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
+                            <div class="icon" style="font-size:2.5rem; margin-right:15px;">🏗️</div>
+                            <div>
+                                <h3 style="margin:0; font-size:1.1rem; color:#64748b;">Construction Overview</h3>
+                                <p id="stat-construction-net" style="font-size:1.2rem; margin:0;">Net: $0</p>
+                            </div>
+                        </div>
+                        <div
+                            style="display:flex; justify-content:space-between; width:100%; margin-top:10px; border-top:1px solid #e2e8f0; padding-top:10px;">
+                            <div>
+                                <small style="color:#64748b; font-weight:600;">TOTAL INCOME</small>
+                                <p id="stat-construction-inc" style="margin:0; font-size:1.3rem; color:#10b981;">$0</p>
+                            </div>
+                            <div style="text-align:right;">
+                                <small style="color:#64748b; font-weight:600;">TOTAL EXPENSE</small>
+                                <p id="stat-construction-exp" style="margin:0; font-size:1.3rem; color:#ef4444;">$0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pharmacy Overview -->
+                    <div class="card stat-card green" id="card-pharmacy" style="flex-direction: column; align-items: flex-start; cursor:pointer;" title="Go to Pharmacy">
+                        <div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
+                            <div class="icon" style="font-size:2.5rem; margin-right:15px;">💊</div>
+                            <div>
+                                <h3 style="margin:0; font-size:1.1rem; color:#64748b;">Pharmacy Overview</h3>
+                                <p style="font-size:1rem; margin:0; color:#94a3b8;">Sales & Inventory</p>
+                            </div>
+                        </div>
+                        <div
+                            style="display:flex; justify-content:space-between; width:100%; margin-top:10px; border-top:1px solid #e2e8f0; padding-top:10px;">
+                            <div>
+                                <small style="color:#64748b; font-weight:600;">TOTAL SALES</small>
+                                <p id="stat-pharmacy-sales" style="margin:0; font-size:1.3rem; color:#1e293b;">$0</p>
+                            </div>
+                            <div style="text-align:right;">
+                                <small style="color:#64748b; font-weight:600;">STOCK UNITS</small>
+                                <p id="stat-pharmacy-stock" style="margin:0; font-size:1.3rem; color:#1e293b;">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Net Profit (Full Width or Fits Grid) -->
+                    <div class="card stat-card purple">
+                        <div class="icon">📊</div>
+                        <div class="info">
+                            <h3>Est. Net Platform Profit</h3>
+                            <p id="stat-net-profit">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-layout">
+                    <!-- Activity Stream -->
+                    <div class="card full-width" style="text-align: left;">
+                        <h3 style="text-align: left;">Recent Activity</h3>
+                        <ul id="activity-stream" class="activity-list" style="text-align: left;">
+                            <li class="empty-state" style="text-align: left;">Loading...</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/layout.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fmt = (n) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+
+            // --- Exchange ---
+            const exTx = window.Store.get('exchange_transactions') || [];
+            const exBuy = exTx.filter(t => t.type === 'buy').reduce((a, c) => a + (c.amount * c.rate), 0);
+            const exSell = exTx.filter(t => t.type === 'sell').reduce((a, c) => a + (c.amount * c.rate), 0);
+            const exTotal = exBuy + exSell;
+
+            document.getElementById('stat-exchange-buy').textContent = fmt(exBuy);
+            document.getElementById('stat-exchange-sell').textContent = fmt(exSell);
+            document.getElementById('stat-exchange-total').textContent = `Total Vol: ${fmt(exTotal)}`;
+
+            // --- Pharmacy ---
+            const phTx = window.Store.get('pharmacy_sales') || [];
+            const phRev = phTx.reduce((a, c) => a + c.total, 0);
+
+            const phStock = window.Store.get('pharmacy_items') || [];
+            const phStockCount = phStock.reduce((a, c) => a + c.qty, 0);
+
+            document.getElementById('stat-pharmacy-sales').textContent = fmt(phRev);
+            document.getElementById('stat-pharmacy-stock').textContent = phStockCount.toLocaleString();
+
+            // --- Construction ---
+            const coExpItems = window.Store.get('construction_expenses') || [];
+            const coIncItems = window.Store.get('construction_income') || [];
+
+            const coExpTotal = coExpItems.reduce((a, c) => a + c.amount, 0);
+            const coIncTotal = coIncItems.reduce((a, c) => a + c.amount, 0);
+            const coBal = coIncTotal - coExpTotal;
+
+            document.getElementById('stat-construction-inc').textContent = fmt(coIncTotal);
+            document.getElementById('stat-construction-exp').textContent = fmt(coExpTotal);
+            document.getElementById('stat-construction-net').textContent = `Net: ${fmt(coBal)}`;
+
+            // --- Net Profit ---
+            const exProfit = (exBuy + exSell) * 0.01;
+            const netProfit = exProfit + (phRev * 0.2) + coBal;
+            document.getElementById('stat-net-profit').textContent = fmt(netProfit);
+
+            // --- Activity Stream ---
+            let activities = [];
+            activities = activities.concat(exTx.map(t => ({ time: t.date, desc: `Exchange: ${t.type.toUpperCase()} ${t.currency} ${t.amount || ''}`, type: 'exchange', color: 'blue', link: '../modules/exchange/records.html' })));
+            activities = activities.concat(phTx.map(t => ({ time: t.date || new Date().toISOString(), desc: `Pharmacy Sale: $${t.total.toFixed(2)} — ${t.items.map(i=> (i.orig_qty||i.qty)+ ' ' + (i.orig_unit|| (i.unit_type==='liquid'?'L':'pcs')) + ' ' + i.name).join('; ')}`, type: 'pharmacy', color: 'green', link: '../modules/pharmacy/records.html' })));
+            activities = activities.concat(coExpItems.map(t => ({ time: t.date, desc: `Construction Exp: ${t.description}`, type: 'construction', color: 'orange' })));
+            activities = activities.concat(coIncItems.map(t => ({ time: t.date, desc: `Construction Inc: ${t.description}`, type: 'construction', color: 'orange' })));
+
+            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+            const recent = activities.slice(0, 10);
+
+            const stream = document.getElementById('activity-stream');
+            stream.innerHTML = '';
+            if (recent.length === 0) stream.innerHTML = '<li class="empty-state" style="text-align:left">No recent activity</li>';
+
+            recent.forEach(act => {
+                const dotColor = act.color === 'blue' ? '#2563eb' : (act.color === 'green' ? '#10b981' : '#f59e0b');
+                // If activity has link, make clickable
+                const linkStart = act.link ? `<a href="${act.link}" style="text-decoration:none;color:inherit">` : '';
+                const linkEnd = act.link ? `</a>` : '';
+                stream.innerHTML += `
+                    <li class="activity-item" style="border-left: 4px solid ${dotColor}; padding-left: 10px; text-align: left;">
+                        ${linkStart}
+                        <span class="activity-time">${new Date(act.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span class="activity-desc"> ${act.desc}</span>
+                        ${linkEnd}
+                    </li>
+                `;
+            });
+
+            // Make stat cards navigate to sector dashboards
+            const cPh = document.getElementById('card-pharmacy'); if (cPh) cPh.onclick = () => window.location.href = '../modules/pharmacy/dashboard.html';
+            const cEx = document.getElementById('card-exchange'); if (cEx) cEx.onclick = () => window.location.href = '../modules/exchange/dashboard.html';
+            const cCo = document.getElementById('card-construction'); if (cCo) cCo.onclick = () => window.location.href = '../modules/construction/dashboard.html';
+        });
+    </script>
+</body>
+
+</html>

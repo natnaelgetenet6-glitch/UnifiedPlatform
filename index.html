@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Platform - Login</title>
+    <!-- Relative path to assets/css is just css/ if we are in root? No, we moved it to assets/css -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3c72;
+        }
+    </style>
+</head>
+
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>UniManage</title>
+
+    <div class="login-card">
+        <h1>Welcome Back</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn-primary full-width">Login</button>
+            <div id="errorMsg" style="color:red; text-align:center; margin-top:10px; display:none">Invalid credentials
+            </div>
+        </form>
+
+        <div style="margin-top:20px; font-size:0.8rem; background:#f8f9fa; padding:10px; border-radius:4px;">
+            <strong>Demo Credentials:</strong><br>
+            admin / 123<br>
+            exchange / 123<br>
+            pharmacy / 123<br>
+            construction / 123
+        </div>
+    </div>
+
+    <!-- Assets now in assets/js -->
+    <script src="assets/js/store.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('errorMsg');
+
+        function redirectUser(user) {
+            if (user.role === 'admin') window.location.href = 'admin/dashboard.html';
+            else if (user.role === 'exchange_user') window.location.href = 'modules/exchange/dashboard.html';
+            else if (user.role === 'pharmacy_user') window.location.href = 'modules/pharmacy/dashboard.html';
+            else if (user.role === 'construction_user') window.location.href = 'modules/construction/dashboard.html';
+        }
+
+        // Check active session
+        const active = JSON.parse(sessionStorage.getItem('active_user'));
+        if (active) redirectUser(active);
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+            const res = window.Auth.login(u, p);
+
+            if (res.success) redirectUser(res.user);
+            else {
+                errorMsg.style.display = 'block';
+                errorMsg.textContent = res.message;
+            }
+        });
+    </script>
+</body>
+
+</html>

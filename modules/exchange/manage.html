@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UniManage - Manage Exchange Rates</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar"></aside>
+        <main class="main-content">
+            <header class="topbar"></header>
+            <div class="content-wrapper">
+                <div class="card">
+                    <h3>Manage Currencies & Rates</h3>
+                    <p style="color:#64748b">Only admin users can add, update or remove currencies and set the current exchange rate used in Buy/Sell forms.</p>
+                    <div id="no-access" style="display:none; color:#ef4444; font-weight:bold;">Access denied. Admins only.</div>
+                    <form id="rates-form">
+                        <div class="form-group">
+                            <label>Currency Code</label>
+                            <input name="currency" placeholder="USD" />
+                        </div>
+                        <div class="form-group">
+                            <label>Buy Rate</label>
+                            <input name="buy_rate" type="number" step="0.0001" />
+                        </div>
+                        <div class="form-group">
+                            <label>Sell Rate</label>
+                            <input name="sell_rate" type="number" step="0.0001" />
+                        </div>
+                        <div>
+                            <button class="btn-primary" type="submit">Save</button>
+                        </div>
+                    </form>
+
+                    <div style="margin-top:1rem">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Currency</th><th>Buy Rate</th><th>Sell Rate</th><th>Updated</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="rates-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/store.js"></script>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/layout.js"></script>
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = window.Auth && window.Auth.currentUser;
+            if (!user || user.role !== 'admin') {
+                document.getElementById('no-access').style.display = 'block';
+                document.getElementById('rates-form').style.display = 'none';
+                return;
+            }
+            window.ExchangeModule.initManage();
+        });
+    </script>
+</body>
+
+</html>

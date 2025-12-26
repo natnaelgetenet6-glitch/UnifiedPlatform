@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UniManage - User Management</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar"></aside>
+    <main class="main-content">
+      <header class="topbar"></header>
+      <div class="content-wrapper">
+        <div class="card">
+          <h3>User Management</h3>
+          <p style="color:#64748b">Create users and assign them to a sector or make them admins.</p>
+          <div style="margin-top:1rem;">
+            <h4>Role Descriptions</h4>
+            <ul style="color:#475569">
+              <li><strong>Admin:</strong> Full access to all modules, can create users, manage rates and system settings.</li>
+              <li><strong>Exchange:</strong> Can record buys/sells, view holdings and transactions.</li>
+              <li><strong>Pharmacy:</strong> Can perform POS sales, view/manage stock (admins only to create items).</li>
+              <li><strong>Construction:</strong> Can log expenses/income and view project financials.</li>
+            </ul>
+
+            <h4 style="margin-top:12px">Permissions Matrix</h4>
+            <table class="data-table" style="margin-top:8px;">
+              <thead>
+                <tr><th>Action</th><th>Admin</th><th>Exchange</th><th>Pharmacy</th><th>Construction</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>View Dashboards</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                <tr><td>Record Buy/Sell (Exchange)</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+                <tr><td>Manage Exchange Rates</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+                <tr><td>POS Sales (Pharmacy)</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td></tr>
+                <tr><td>Manage Pharmacy Stock</td><td>✅</td><td>❌</td><td>Limited*</td><td>❌</td></tr>
+                <tr><td>Manage Users</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+                <tr><td>Log Construction Expenses</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              </tbody>
+            </table>
+            <div style="color:#64748b; font-size:0.9rem; margin-top:6px">*Pharmacy users can add stock quantity via the stock modal; only Admin can create or change metadata (prices, description, unit type).</div>
+          </div>
+          <div id="no-access" style="display:none;color:#ef4444;font-weight:bold">Access denied. Admins only.</div>
+
+          <form id="user-form" style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:10px;">
+            <div style="width:150px">
+              <label>Username</label>
+              <input name="username" required />
+            </div>
+            <div style="width:160px">
+              <label>Password</label>
+              <input name="password" type="password" required />
+            </div>
+            <div style="width:200px">
+              <label>Full Name</label>
+              <input name="name" />
+            </div>
+            <div style="width:200px">
+              <label>Role / Sector</label>
+              <select name="role">
+                <option value="pharmacy_user">Pharmacy</option>
+                <option value="exchange_user">Exchange</option>
+                <option value="construction_user">Construction</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <button class="btn-primary" type="submit">Create</button>
+            </div>
+          </form>
+
+          <div style="margin-top:1rem">
+            <table class="data-table">
+              <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Actions</th></tr></thead>
+              <tbody id="users-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/js/store.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/layout.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.Auth && window.Auth.currentUser;
+      if (!user || user.role !== 'admin') {
+        document.getElementById('no-access').style.display = 'block';
+        document.getElementById('user-form').style.display = 'none';
+        return;
+      }
+
+      const tbody = document.getElementById('users-body');
+      const form = document.getElementById('user-form');
+
+      function render() {
+        const users = window.Store.get('unified_users') || [];
+        tbody.innerHTML = '';
+        users.forEach(u => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${u.username}</td><td>${u.name||''}</td><td>${u.role}</td><td><button class="btn-secondary edit-user" data-user="${u.username}">Edit</button> <button class="btn-danger delete-user" data-user="${u.username}">Delete</button></td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      render();
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const userObj = { username: fd.get('username').trim(), password: fd.get('password'), name: fd.get('name')||'', role: fd.get('role') };
+        if (!userObj.username || !userObj.password) { alert('username and password required'); return; }
+        const users = window.Store.get('unified_users') || [];
+        if (users.some(u => u.username === userObj.username)) { alert('username exists'); return; }
+        users.push(userObj);
+        window.Store.set('unified_users', users);
+        form.reset(); render();
+      });
+
+      tbody.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button'); if (!btn) return;
+        const uname = btn.dataset.user;
+        if (btn.classList.contains('delete-user')) {
+          if (!confirm('Delete user '+uname+'?')) return;
+          let users = window.Store.get('unified_users') || [];
+          users = users.filter(u => u.username !== uname);
+          window.Store.set('unified_users', users); render();
+        } else if (btn.classList.contains('edit-user')) {
+          const users = window.Store.get('unified_users') || [];
+          const u = users.find(x => x.username === uname);
+          if (!u) return; 
+          const newName = prompt('Full name', u.name||''); if (newName===null) return;
+          const newRole = prompt('Role (admin,exchange_user,pharmacy_user,construction_user)', u.role) || u.role;
+          u.name = newName; u.role = newRole;
+          window.Store.set('unified_users', users); render();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

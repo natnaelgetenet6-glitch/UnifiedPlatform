@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Management Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Using Google Fonts for better aesthetics -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <h2>UniManage</h2>
+            </div>
+            <nav class="nav-menu">
+                <ul id="sidebar-menu">
+                    <!-- Populated by JS -->
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="topbar">
+                <h2 id="page-title">Dashboard</h2>
+                <div class="user-info">
+                    <span id="displayUsername" class="username">User</span>
+                    <span id="displayRole" class="role-badge">Role</span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </header>
+
+            <!-- Content Body -->
+            <div class="content-wrapper">
+
+                <!-- ================= ADMIN OVERVIEW ================= -->
+                <div id="view-admin-overview" class="view-section hidden">
+
+                    <!-- Global Stats Cards -->
+                    <div class="dashboard-grid">
+                        <div class="card stat-card blue">
+                            <div class="icon">💰</div>
+                            <div class="info">
+                                <h3>Total Exchange Vol</h3>
+                                <p id="stat-exchange">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card green">
+                            <div class="icon">💊</div>
+                            <div class="info">
+                                <h3>Pharmacy Sales</h3>
+                                <p id="stat-pharmacy">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card orange">
+                            <div class="icon">🏗️</div>
+                            <div class="info">
+                                <h3>Construction Balance</h3>
+                                <p id="stat-construction">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card purple">
+                            <div class="icon">📊</div>
+                            <div class="info">
+                                <h3>Net Platform Profit</h3>
+                                <p id="stat-net-profit">0</p>
+                                <small>Est. from all sectors</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-layout">
+                        <!-- Simple CSS Chart Placeholder -->
+                        <div class="card">
+                            <h3>Revenue Distribution</h3>
+                            <div class="css-chart-container">
+                                <div class="bar-group">
+                                    <div class="bar blue" style="height: 60%" title="Exchange"></div>
+                                    <label>Exchange</label>
+                                </div>
+                                <div class="bar-group">
+                                    <div class="bar green" style="height: 40%" title="Pharmacy"></div>
+                                    <label>Pharmacy</label>
+                                </div>
+                                <div class="bar-group">
+                                    <div class="bar orange" style="height: 80%" title="Construction"></div>
+                                    <label>Construction</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Stream -->
+                        <div class="card">
+                            <h3>Recent Activity</h3>
+                            <ul id="activity-stream" class="activity-list">
+                                <!-- Populated by JS -->
+                                <li class="empty-state">No recent activity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= EXCHANGE MODULE ================= -->
+                <!-- 1. Dashboard -->
+                <div id="view-exchange-dashboard" class="view-section hidden">
+                    <h3>Exchange Dashboard</h3>
+
+                    <div class="action-bar" style="margin-bottom: 2rem;">
+                        <button class="btn-primary" onclick="window.App.navigateTo('exchange-buy')">Record Buy (Stock
+                            In)</button>
+                        <button class="btn-success" onclick="window.App.navigateTo('exchange-sell')">Record Sell (Stock
+                            Out)</button>
+                    </div>
+
+                    <div class="dashboard-grid four-col">
+                        <div class="card">
+                            <h4>USD Buy</h4>
+                            <p id="ex-buy-usd">0</p>
+                        </div>
+                        <div class="card">
+                            <h4>USD Sell</h4>
+                            <p id="ex-sell-usd">0</p>
+                        </div>
+                        <div class="card">
+                            <h4>EUR Buy</h4>
+                            <p id="ex-buy-eur">0</p>
+                        </div>
+                        <div class="card">
+                            <h4>EUR Sell</h4>
+                            <p id="ex-sell-eur">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Buy Form -->
+                <div id="view-exchange-buy" class="view-section hidden">
+                    <div class="form-container card">
+                        <h3>Record Currency Purchase (Stock In)</h3>
+                        <form id="exchange-buy-form">
+                            <!-- Injected by JS or Static -->
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 3. Sell Form -->
+                <div id="view-exchange-sell" class="view-section hidden">
+                    <div class="form-container card">
+                        <h3>Record Currency Sale (Stock Out)</h3>
+                        <form id="exchange-sell-form">
+                            <!-- Injected by JS or Static -->
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 4. Records -->
+                <div id="view-exchange-records" class="view-section hidden">
+                    <h3>Transaction History</h3>
+                    <div class="card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Customer</th>
+                                    <th>Currency</th>
+                                    <th>Amount</th>
+                                    <th>Rate</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="exchange-records-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <!-- ================= PHARMACY MODULE ================= -->
+                <div id="view-pharmacy-dashboard" class="view-section hidden">
+                    <h3>Pharmacy Dashboard</h3>
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h4>Today's Sales</h4>
+                            <p id="ph-today-sales">0</p>
+                        </div>
+                        <div class="card">
+                            <h4>Low Stock Items</h4>
+                            <p id="ph-low-stock">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-pharmacy-pos" class="view-section hidden">
+                    <!-- POS UI moved here -->
+                    <div class="pos-container">
+                        <div class="card pos-left">
+                            <h3>New Sale</h3>
+                            <div class="form-group">
+                                <label>Select Item</label>
+                                <select id="pos-item-select"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input type="number" id="pos-qty" value="1" min="1">
+                            </div>
+                            <button class="btn-success full-width" onclick="window.PharmacyModule.addToCart()">Add to
+                                Cart</button>
+                        </div>
+                        <div class="card pos-right">
+                            <h3>Current Cart</h3>
+                            <ul id="pos-cart-list" class="cart-list"></ul>
+                            <div class="cart-total">Total: <span id="pos-total">0.00</span></div>
+                            <button class="btn-primary full-width" onclick="window.PharmacyModule.checkout()">Complete
+                                Sale</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-pharmacy-stock" class="view-section hidden">
+                    <div class="action-bar">
+                        <button class="btn-primary" onclick="window.PharmacyModule.openStockModal()">+ Add New
+                            Item</button>
+                    </div>
+                    <div class="card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pharmacy-stock-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="view-pharmacy-records" class="view-section hidden">
+                    <h3>Sales History</h3>
+                    <div class="card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pharmacy-records-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ================= CONSTRUCTION MODULE ================= -->
+                <div id="view-construction-dashboard" class="view-section hidden">
+                    <h3>Construction Overview</h3>
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h4>Project Balance</h4>
+                            <p id="cons-dash-balance">0</p>
+                        </div>
+                        <div class="card">
+                            <h4>Total Expenses</h4>
+                            <p id="cons-dash-expense">0</p>
+                        </div>
+                        <div class="card">
+                            <h4>Total Income</h4>
+                            <p id="cons-dash-income">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-construction-expense" class="view-section hidden">
+                    <div class="form-container card">
+                        <h3>Log Material / Labor Expense</h3>
+                        <form id="construction-expense-form">
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" id="exp-desc" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <input type="number" id="exp-amount" required step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="exp-date" required>
+                            </div>
+                            <button type="submit" class="btn-danger">Record Expense</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="view-construction-income" class="view-section hidden">
+                    <div class="form-container card">
+                        <h3>Log Rent / Income</h3>
+                        <form id="construction-income-form">
+                            <div class="form-group">
+                                <label>Source / Unit</label>
+                                <input type="text" id="inc-desc" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <input type="number" id="inc-amount" required step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="inc-date" required>
+                            </div>
+                            <button type="submit" class="btn-success">Record Income</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="view-construction-records" class="view-section hidden">
+                    <h3>Financial Records</h3>
+                    <div class="card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="construction-records-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Generic Modal for edits only -->
+    <div id="modal-container" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Title</h2>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="js/store.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/exchange.js"></script>
+    <script src="js/pharmacy.js"></script>
+    <script src="js/construction.js"></script>
+</body>
+
+</html>
