@@ -107,6 +107,116 @@
                     </div>
                 </div>
 
+                <!-- ================= ADMIN ANALYTICS ================= -->
+                <div id="view-admin-analytics" class="view-section hidden">
+                    <div class="action-bar">
+                        <select id="analytics-period" class="form-control" style="margin-right: 1rem;">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                            <option value="365">Last Year</option>
+                        </select>
+                        <button id="export-analytics-btn" class="btn-secondary">Export Report</button>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="dashboard-grid">
+                        <div class="card stat-card blue">
+                            <div class="icon">💰</div>
+                            <div class="info">
+                                <h3>Total Revenue</h3>
+                                <p id="analytics-total-revenue">$0</p>
+                                <small id="analytics-revenue-change">+0% from last period</small>
+                            </div>
+                        </div>
+                        <div class="card stat-card green">
+                            <div class="icon">📈</div>
+                            <div class="info">
+                                <h3>Exchange Volume</h3>
+                                <p id="analytics-exchange-volume">$0</p>
+                                <small id="analytics-exchange-change">+0% from last period</small>
+                            </div>
+                        </div>
+                        <div class="card stat-card purple">
+                            <div class="icon">💊</div>
+                            <div class="info">
+                                <h3>Pharmacy Sales</h3>
+                                <p id="analytics-pharmacy-sales">$0</p>
+                                <small id="analytics-pharmacy-change">+0% from last period</small>
+                            </div>
+                        </div>
+                        <div class="card stat-card orange">
+                            <div class="icon">🏗️</div>
+                            <div class="info">
+                                <h3>Construction Profit</h3>
+                                <p id="analytics-construction-profit">$0</p>
+                                <small id="analytics-construction-change">+0% from last period</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="grid-layout">
+                        <!-- Revenue Trend Chart -->
+                        <div class="card">
+                            <h3>Revenue Trend</h3>
+                            <div class="chart-container">
+                                <canvas id="revenue-trend-chart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Module Performance -->
+                        <div class="card">
+                            <h3>Module Performance</h3>
+                            <div class="chart-container">
+                                <canvas id="module-performance-chart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Analytics -->
+                    <div class="grid-layout">
+                        <!-- Top Products/Services -->
+                        <div class="card">
+                            <h3>Top Performing Items</h3>
+                            <div id="top-items-list" class="analytics-list">
+                                <div class="empty-state">No data available</div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Summary -->
+                        <div class="card">
+                            <h3>Transaction Summary</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Module</th>
+                                        <th>Transactions</th>
+                                        <th>Total Amount</th>
+                                        <th>Avg Transaction</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-summary-body">
+                                    <tr><td colspan="4" class="empty-state">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Time-based Analysis -->
+                    <div class="card">
+                        <h3>Detailed Breakdown</h3>
+                        <div class="analytics-tabs">
+                            <button class="tab-btn active" data-tab="daily">Daily</button>
+                            <button class="tab-btn" data-tab="weekly">Weekly</button>
+                            <button class="tab-btn" data-tab="monthly">Monthly</button>
+                        </div>
+                        <div id="detailed-breakdown-content">
+                            <div class="empty-state">Select a time period above</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ================= EXCHANGE MODULE ================= -->
                 <!-- 1. Dashboard -->
                 <div id="view-exchange-dashboard" class="view-section hidden">

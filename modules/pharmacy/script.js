@@ -260,21 +260,32 @@ class PharmacyModule {
         const items = window.Store.get(this.stockKey) || [];
         const tbody = document.getElementById('pharmacy-stock-body');
         tbody.innerHTML = '';
+        const now = new Date();
+        const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
         items.forEach(item => {
             const tr = document.createElement('tr');
+            // Check if item expires within 30 days
+            if (item.expiry_date) {
+                const expiryDate = new Date(item.expiry_date);
+                if (expiryDate <= thirtyDaysFromNow && expiryDate >= now) {
+                    tr.classList.add('expiring-soon');
+                }
+            }
             // Migration: if sell_price missing, show calc
             const sell = item.sell_price || (item.buy_price * 1.5);
             let unitInfo = '';
             if (item.unit_type === 'box') unitInfo = `${Math.floor(item.qty / (item.pieces_per_box || 1))} boxes (${item.qty} pcs)`;
             else if (item.unit_type === 'liquid') unitInfo = `${item.qty} L`;
             else unitInfo = `${item.qty} pcs`;
+            const unitDisplay = item.unit_type === 'pcs' ? 'Pieces' : item.unit_type === 'box' ? 'Box' : item.unit_type === 'liquid' ? 'Liters' : item.unit_type;
+            const batchDisplay = item.batch || '-';
             const manuf = item.manuf_date || '-';
             const exp = item.expiry_date || '-';
             const desc = item.description ? (item.description.length>60? item.description.slice(0,60)+'...':item.description) : '-';
             const currentUser = (window.Auth && window.Auth.currentUser) ? window.Auth.currentUser : null;
             const isAdmin = currentUser && currentUser.role === 'admin';
             const actionBtn = isAdmin ? `<button class="btn-secondary" onclick="window.openStockModal(${item.id})">Edit</button>` : `<button class="btn-secondary" onclick="window.openStockModal(${item.id})">Add Qty</button>`;
-            tr.innerHTML = `<td>${item.id}</td><td>${item.name}</td><td>${desc}</td><td>${(item.buy_price||0).toFixed(2)}</td><td>${sell.toFixed(2)}</td><td>${unitInfo}</td><td>${manuf}</td><td>${exp}</td><td>${actionBtn}</td>`;
+            tr.innerHTML = `<td>${item.id}</td><td>${item.name}</td><td>${desc}</td><td>${(item.buy_price||0).toFixed(2)}</td><td>${sell.toFixed(2)}</td><td>${unitInfo}</td><td>${unitDisplay}</td><td>${batchDisplay}</td><td>${manuf}</td><td>${exp}</td><td>${actionBtn}</td>`;
             tbody.appendChild(tr);
         });
     }
@@ -293,6 +304,7 @@ class PharmacyModule {
         document.getElementById('st-pieces-per-box').value = item ? (item.pieces_per_box || 1) : 1;
         document.getElementById('st-qty').value = 0; // default to add 0
         document.getElementById('st-qty-unit').value = 'base';
+        document.getElementById('st-batch').value = item ? (item.batch || '') : '';
         document.getElementById('st-manuf').value = item ? (item.manuf_date || '') : '';
         document.getElementById('st-expiry').value = item ? (item.expiry_date || '') : '';
         // description field
@@ -317,6 +329,7 @@ class PharmacyModule {
         document.getElementById('st-sell-price').disabled = !isAdmin;
         document.getElementById('st-unit-type').disabled = !isAdmin;
         document.getElementById('st-pieces-per-box').disabled = !isAdmin;
+        document.getElementById('st-batch').disabled = !isAdmin;
         document.getElementById('st-manuf').disabled = !isAdmin;
         document.getElementById('st-expiry').disabled = !isAdmin;
         if (document.getElementById('st-description')) document.getElementById('st-description').disabled = !isAdmin;
@@ -331,6 +344,7 @@ class PharmacyModule {
                 sell_price: parseFloat(document.getElementById('st-sell-price').value),
                 unit_type: document.getElementById('st-unit-type').value,
                 pieces_per_box: parseInt(document.getElementById('st-pieces-per-box').value) || 1,
+                batch: document.getElementById('st-batch').value || '',
                 qty: parseFloat(document.getElementById('st-qty').value) || 0,
                 qty_unit: document.getElementById('st-qty-unit').value,
                 manuf_date: document.getElementById('st-manuf').value,
@@ -360,6 +374,8 @@ class PharmacyModule {
                     items[idx].manuf_date = formData.manuf_date;
                     items[idx].expiry_date = formData.expiry_date;
                 }
+                // update batch
+                if (isAdmin) items[idx].batch = formData.batch || items[idx].batch || '';
                 // Calculate qty to add based on qty_unit
                 let addQty = formData.qty || 0;
                 if (formData.qty_unit === 'boxes' && items[idx].unit_type === 'box') {
@@ -378,7 +394,7 @@ class PharmacyModule {
             if (formData.qty_unit === 'boxes' && formData.unit_type === 'box') {
                 baseQty = (formData.qty || 0) * (formData.pieces_per_box || 1);
             }
-            const newItem = { name: formData.name, description: formData.description || '', buy_price: formData.price, sell_price: formData.sell_price, qty: baseQty, unit_type: formData.unit_type || 'pcs', pieces_per_box: formData.pieces_per_box || 1, manuf_date: formData.manuf_date || '', expiry_date: formData.expiry_date || '' };
+            const newItem = { name: formData.name, description: formData.description || '', buy_price: formData.price, sell_price: formData.sell_price, qty: baseQty, unit_type: formData.unit_type || 'pcs', pieces_per_box: formData.pieces_per_box || 1, batch: formData.batch || '', manuf_date: formData.manuf_date || '', expiry_date: formData.expiry_date || '' };
             window.Store.add(this.stockKey, newItem);
             items = window.Store.get(this.stockKey);
         }
