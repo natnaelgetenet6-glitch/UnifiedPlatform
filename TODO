@@ -1,0 +1,46 @@
+1. Sector-Specific "Must-Haves"
+      Each module needs to handle the "heavy lifting" unique to that industry before the data is rolled up.
+      
+      Pharmacy Wholesale (The Logistics Engine)
+      
+          [] Expiry & Batch Tracking: Automated "First-to-Expire, First-Out" (FEFO) logic.
+          
+          [] Cold Chain Monitoring: Integration with IoT sensors for temperature-sensitive meds.
+          
+          [] Regulatory Compliance: Automated reporting for controlled substances or MOH (Ministry of Health) requirements.
+      
+      Money Exchange (The Risk Engine)
+      
+          [] Real-time Rate Feeds: Integration with global APIs (like Reuters or Bloomberg) to set margins automatically.
+          
+          [] AML/KYC Module: Instant black-list scanning and ID verification for transactions.
+          
+          [] Position Management: A "Vault View" showing exactly how much of each currency is held across all branches in real-time.
+      
+      Construction (The Project Engine)
+      
+          [] BOQ (Bill of Quantities) Tracker: Real-time consumption vs. estimated budget.
+          
+          [] Subcontractor Portal: Management of progress payments and certifications.
+          
+          [] Equipment Utilization: Tracking hours and maintenance for heavy machinery.
+      
+2. The "Unified Management" Layer
+The real value of your platform is where these three intersect. You need a Master Dashboard that doesn't just show three lists, but blends them into a business intelligence suite.
+
+    A. The Unified Cash Flow (The "Liquidity" View)
+    Since you have a Money Exchange and a Wholesale business, your cash movements are complex.
+    
+        The Idea: A dashboard that shows Total Group Liquidity.
+        
+        [] Cross-Sector Logic: "We have $500k tied up in Pharma stock, $1M in Construction receivables, and $2M in physical cash in the Exchange." This helps the owner decide where to move capital today.
+    
+    B. Resource Inter-Trading
+    The Idea: An Internal Procurement module.
+    
+        [] Cross-Sector Logic: If the Construction wing needs to buy imported materials, the system should "buy" the currency from the Money Exchange wing at a preferred internal rate, keeping the profit within the group.
+    
+    C. Unified Human Resources & Asset Map
+    The Idea: A map-based view showing all assets.
+
+Cross-Sector Logic: View all pharmacies, exchange branches, and construction sites on one map. Use "Geofencing" to ensure delivery trucks (Pharma) or excavators (Construction) are where they should be.
