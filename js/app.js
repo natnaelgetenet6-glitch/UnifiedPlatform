@@ -40,7 +40,8 @@ class App {
                 header: 'Main',
                 roles: ['admin'],
                 items: [
-                    { id: 'admin-overview', label: 'Overview', icon: '📊' }
+                    { id: 'admin-overview', label: 'Overview', icon: '📊' },
+                    { id: 'admin-analytics', label: 'Reports & Analytics', icon: '📈' }
                 ]
             },
             {
@@ -127,7 +128,13 @@ class App {
 
         console.log(`Navigating to: ${module} -> ${action}`);
 
-        if (module === 'admin') this.renderAdminDashboard();
+        if (module === 'admin') {
+            if (action === 'analytics') {
+                this.renderAdminAnalytics();
+            } else {
+                this.renderAdminDashboard();
+            }
+        }
 
         // Delegate to module controllers if they exist
         if (module === 'exchange' && window.ExchangeModule) window.ExchangeModule.onViewLoad(action);
@@ -162,6 +169,22 @@ class App {
         if (npEl) npEl.textContent = netProfit.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
 
         this.renderActivityStream();
+    }
+
+    renderAdminAnalytics() {
+        // Load analytics script if not already loaded
+        if (!window.Analytics) {
+            const script = document.createElement('script');
+            script.src = 'js/analytics.js';
+            script.onload = () => {
+                if (window.Analytics && window.Analytics.renderAnalytics) {
+                    window.Analytics.renderAnalytics();
+                }
+            };
+            document.head.appendChild(script);
+        } else {
+            window.Analytics.renderAnalytics();
+        }
     }
 
     renderActivityStream() {

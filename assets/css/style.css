@@ -233,6 +233,14 @@ body {
     background: #f8fafc;
 }
 
+.data-table tr.expiring-soon {
+    background: #fef2f2;
+}
+
+.data-table tr.expiring-soon td {
+    color: var(--danger);
+}
+
 /* Buttons & Forms */
 button {
     font-family: inherit;
@@ -319,6 +327,14 @@ button:hover {
     border-radius: 6px;
     box-sizing: border-box;
     font-size: 1rem;
+}
+
+.form-help {
+    display: block;
+    margin-top: 0.25rem;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-style: italic;
 }
 
 /* Exchange UI polish */
