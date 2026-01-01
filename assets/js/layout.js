@@ -120,7 +120,8 @@ class Layout {
                 header: 'Administration',
                 roles: ['admin'],
                 items: [
-                    { label: 'Users', icon: '👥', link: 'admin/users.html' }
+                    { label: 'Users', icon: '👥', link: 'admin/users.html' },
+                    { label: 'System Logs', icon: '📋', link: 'admin/logs.html' }
                 ]
             },
             {

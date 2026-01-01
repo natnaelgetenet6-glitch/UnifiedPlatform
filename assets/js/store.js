@@ -55,6 +55,34 @@ class Store {
         this.set(key, list);
         return item;
     }
+
+    // Audit Trail functionality
+    logActivity(action_type, module_name, details = '') {
+        const user = JSON.parse(sessionStorage.getItem('active_user') || '{}');
+        const current_user = user.name || user.username || 'Unknown';
+
+        const logEntry = {
+            id: Date.now(),
+            current_user: current_user,
+            action_type: action_type, // 'Create', 'Update', 'Delete'
+            module_name: module_name, // 'exchange', 'pharmacy', 'construction', 'admin'
+            details: details,
+            timestamp: new Date().toISOString()
+        };
+
+        const logs = this.get('activity_logs') || [];
+        logs.push(logEntry);
+        this.set('activity_logs', logs);
+
+        return logEntry;
+    }
+
+    getActivityLogs(limit = null) {
+        const logs = this.get('activity_logs') || [];
+        // Sort by timestamp descending (newest first)
+        logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        return limit ? logs.slice(0, limit) : logs;
+    }
 }
 
 const store = new Store();

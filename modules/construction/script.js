@@ -30,6 +30,13 @@ class ConstructionModule {
             };
             const key = type === 'expense' ? this.expenseKey : this.incomeKey;
             window.Store.add(key, data);
+
+            // Log the activity
+            const actionType = 'Create';
+            const moduleName = 'construction';
+            const details = `${type === 'expense' ? 'Expense' : 'Income'} logged: ${data.description} - $${data.amount}`;
+            window.Store.logActivity(actionType, moduleName, details);
+
             alert('Saved!');
             form.reset();
         });

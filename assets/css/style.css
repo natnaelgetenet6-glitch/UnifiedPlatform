@@ -535,3 +535,27 @@ label {
     .menu-item { padding: 0.6rem 1rem; font-size: 0.9rem; }
     .page-title h2 { font-size: 1.1rem; }
 }
+
+/* Action Badge Styles */
+.action-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.action-create {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.action-update {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.action-delete {
+    background: #fef2f2;
+    color: #dc2626;
+}

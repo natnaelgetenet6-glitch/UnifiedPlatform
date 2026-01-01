@@ -263,6 +263,12 @@ class ExchangeModule {
             // Persist transaction and update lot-based holdings (FIFO)
             const saved = window.Store.add(this.storeKey, data);
 
+            // Log the activity
+            const actionType = 'Create';
+            const moduleName = 'exchange';
+            const details = `${type.toUpperCase()} ${amount} ${currency} at rate ${data.rate}`;
+            window.Store.logActivity(actionType, moduleName, details);
+
             // Load or init holdings map
             const holdings = window.Store.get(this.holdingsKey) || {};
             if (type === 'buy') {

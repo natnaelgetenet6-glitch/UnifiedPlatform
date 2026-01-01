@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniManage - System Logs</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar container (filled by layout.js) -->
+        <aside class="sidebar"></aside>
+
+        <main class="main-content">
+            <!-- Topbar container (filled by layout.js) -->
+            <header class="topbar"></header>
+
+            <div class="content-wrapper">
+                <div class="card">
+                    <h3>System Activity Logs</h3>
+                    <div style="margin-bottom: 20px;">
+                        <button id="refreshLogs" class="btn-primary">Refresh Logs</button>
+                        <button id="clearLogs" class="btn-danger" style="margin-left: 10px;">Clear All Logs</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="logsTable">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Module</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">Loading logs...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/layout.js"></script>
+    <script>
+        function loadLogs() {
+            const logs = window.Store.getActivityLogs();
+            const tbody = document.getElementById('logsTableBody');
+
+            if (logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">No activity logs found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${new Date(log.timestamp).toLocaleString()}</td>
+                    <td>${log.current_user}</td>
+                    <td>
+                        <span class="action-badge action-${log.action_type.toLowerCase()}">
+                            ${log.action_type}
+                        </span>
+                    </td>
+                    <td>${log.module_name}</td>
+                    <td>${log.details || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function clearLogs() {
+            if (confirm('Are you sure you want to clear all activity logs? This action cannot be undone.')) {
+                window.Store.set('activity_logs', []);
+                loadLogs();
+                alert('All logs have been cleared.');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('refreshLogs').addEventListener('click', loadLogs);
+        document.getElementById('clearLogs').addEventListener('click', clearLogs);
+
+        // Load logs on page load
+        document.addEventListener('DOMContentLoaded', loadLogs);
+    </script>
+</body>
+
+</html>

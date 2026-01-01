@@ -241,6 +241,12 @@ class PharmacyModule {
         });
         window.Store.set(this.stockKey, stock);
 
+        // Log the activity
+        const actionType = 'Create';
+        const moduleName = 'pharmacy';
+        const details = `Sale completed: $${sale.total.toFixed(2)} - ${sale.items.length} item(s)`;
+        window.Store.logActivity(actionType, moduleName, details);
+
         this.cart = [];
         this.renderCart();
         this.updatePosSelect();
