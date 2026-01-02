@@ -56,6 +56,30 @@ class Store {
         return item;
     }
 
+    // Mark an item in a list as voided (keeps record for audit)
+    voidItem(key, id, reason = '') {
+        const list = this.get(key) || [];
+        const idx = list.findIndex(i => i.id == id);
+        if (idx === -1) return null;
+        const user = JSON.parse(sessionStorage.getItem('active_user') || '{}');
+        const current_user = user.name || user.username || 'Unknown';
+        const item = list[idx];
+        if (item.status === 'voided') return item; // already voided
+
+        item.status = 'voided';
+        item.voided_by = current_user;
+        item.voided_at = new Date().toISOString();
+        item.void_reason = reason || '';
+
+        list[idx] = item;
+        this.set(key, list);
+
+        // Log the audit action
+        this.logActivity('Void', key.replace(/[^a-z]/g, ''), `Voided id=${id} reason=${reason}`);
+
+        return item;
+    }
+
     // Audit Trail functionality
     logActivity(action_type, module_name, details = '') {
         const user = JSON.parse(sessionStorage.getItem('active_user') || '{}');

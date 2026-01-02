@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Smoke Test — UnifiedPlatform</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div style="padding:20px">
+    <h2>Smoke Tests — Exchange & Pharmacy</h2>
+    <p>Ensure you opened this from the project root (file://.../UnifiedPlatform/smoke_test.html)</p>
+    <div style="display:flex;gap:12px;margin-bottom:12px">
+      <button id="run-ex" class="btn-primary">Run Exchange Test</button>
+      <button id="run-ph" class="btn-primary">Run Pharmacy Test</button>
+      <button id="clear" class="btn-secondary">Reset Mock Data</button>
+    </div>
+    <pre id="out" style="background:#fff;padding:12px;border-radius:8px;max-height:400px;overflow:auto;border:1px solid #e6eef8"></pre>
+  </div>
+
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="modules/exchange/script.js"></script>
+  <script src="modules/pharmacy/script.js"></script>
+  <script>
+    // Ensure session user
+    sessionStorage.setItem('active_user', JSON.stringify({ username: 'admin', name: 'Admin', role: 'admin' }));
+
+    const out = document.getElementById('out');
+    const log = (...args) => { out.textContent += args.join(' ') + '\n'; };
+
+    document.getElementById('clear').onclick = () => {
+      localStorage.clear();
+      // re-init mock keys
+      store.init(); // store is global from assets/js/store.js
+      out.textContent = 'LocalStorage cleared and mock data re-initialized.\n';
+    };
+
+    document.getElementById('run-ex').onclick = async () => {
+      out.textContent = '';
+      log('Running Exchange smoke test...');
+
+      // reset exchange_transactions & holdings
+      window.Store.set('exchange_transactions', []);
+      window.Store.set('exchange_holdings', {});
+
+      // Add sample buys and sells
+      const ex = window.ExchangeModule;
+      const b1 = window.Store.add('exchange_transactions', { type: 'buy', customer: 'Alice', id_card: 'A1', currency: 'USD', amount: 1000, rate: 1.0 });
+      const b2 = window.Store.add('exchange_transactions', { type: 'buy', customer: 'Bob', id_card: 'B1', currency: 'EUR', amount: 500, rate: 1.1 });
+      const s1 = window.Store.add('exchange_transactions', { type: 'sell', customer: 'Charlie', id_card: 'C1', currency: 'USD', amount: 200, rate: 1.05 });
+
+      // Update holdings as the real form would
+      const holdings = {};
+      holdings['USD'] = { lots: [{ amount: 1000, rate: 1.0, date: b1.date }] };
+      holdings['EUR'] = { lots: [{ amount: 500, rate: 1.1, date: b2.date }] };
+      window.Store.set('exchange_holdings', holdings);
+
+      // Run dashboard
+      ex.initDashboard();
+      ex.initStock();
+
+      // Read displayed totals
+      const usdBuy = document.getElementById('ex-buy-usd') ? document.getElementById('ex-buy-usd').textContent : 'N/A';
+      const usdSell = document.getElementById('ex-sell-usd') ? document.getElementById('ex-sell-usd').textContent : 'N/A';
+      const eurBuy = document.getElementById('ex-buy-eur') ? document.getElementById('ex-buy-eur').textContent : 'N/A';
+
+      log('USD Buy:', usdBuy);
+      log('USD Sell:', usdSell);
+      log('EUR Buy:', eurBuy);
+
+      log('\nTransactions saved:');
+      const all = window.Store.get('exchange_transactions') || [];
+      all.forEach(t => log(JSON.stringify(t)));
+
+      log('\nHoldings:');
+      log(JSON.stringify(window.Store.get('exchange_holdings')));
+    };
+
+    document.getElementById('run-ph').onclick = async () => {
+      out.textContent = '';
+      log('Running Pharmacy smoke test...');
+
+      // Reset sales and stock
+      window.Store.set('pharmacy_sales', []);
+      // ensure stock exists
+      const items = window.Store.get('pharmacy_items') || [];
+      if (!items || items.length === 0) {
+        window.Store.set('pharmacy_items', [ { id:1, name:'TestItem', buy_price:5, sell_price:10, qty:50, unit_type:'pcs' } ]);
+      } else {
+        // ensure first item has enough qty
+        const st = items[0]; st.qty = 50; window.Store.set('pharmacy_items', items);
+      }
+
+      const pmod = window.PharmacyModule;
+
+      // Create a sale similar to checkout
+      const sale = { items: [ { itemId: 1, name: 'TestItem', qty: 2, orig_qty:2, orig_unit:'pcs', price: 10, buy_price:5, unit_type:'pcs', description:'' } ], total: 20, date: new Date().toISOString(), user: 'clerk' };
+      window.Store.add('pharmacy_sales', sale);
+
+      // Decrement stock to simulate checkout
+      const stock = window.Store.get('pharmacy_items');
+      const it = stock.find(i=>i.id===1);
+      if (it) { it.qty -= 2; window.Store.set('pharmacy_items', stock); }
+
+      pmod.initDashboard();
+      pmod.initRecords();
+      pmod.renderStockList();
+
+      log('Sales:');
+      (window.Store.get('pharmacy_sales')||[]).forEach(s => log(JSON.stringify(s)));
+      log('Stock[0]:', JSON.stringify((window.Store.get('pharmacy_items')||[])[0]));
+
+      // Show totals from dashboard
+      const today = document.getElementById('ph-today-sales') ? document.getElementById('ph-today-sales').textContent : 'N/A';
+      log('Today Sales:', today);
+    };
+
+    // Ensure layout modal and UI available
+    document.addEventListener('DOMContentLoaded', () => { window.Layout = window.Layout || new Layout(); });
+  </script>
+</body>
+</html>

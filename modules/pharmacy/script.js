@@ -232,7 +232,7 @@ class PharmacyModule {
             date: new Date().toISOString(),
             user: (window.Auth && window.Auth.currentUser) ? window.Auth.currentUser.username : 'unknown'
         };
-        window.Store.add(this.salesKey, sale);
+        const saved = window.Store.add(this.salesKey, sale);
 
         const stock = window.Store.get(this.stockKey);
         this.cart.forEach(cartItem => {
@@ -250,7 +250,13 @@ class PharmacyModule {
         this.cart = [];
         this.renderCart();
         this.updatePosSelect();
-        alert('Sale Completed!');
+        const res = await window.UI.confirm({ title: 'Sale Completed', message: 'Sale completed successfully. Print receipt?', confirmText: 'Print', cancelText: 'Close', allowInput: false });
+        if (res && res.confirmed) {
+            // fetch latest saved record (may include generated id/date)
+            const all = window.Store.get(this.salesKey) || [];
+            const tx = all.find(t => t.id === (saved && saved.id));
+            window.UI.printReceipt.sale(tx || saved || sale);
+        }
     }
 
     // --- Stock ---
@@ -422,8 +428,41 @@ class PharmacyModule {
                 return `${i.name} (${q} ${unit})${extra}`;
             }).join(', ');
             tr.innerHTML = `<td>${new Date(s.date).toLocaleString()}</td><td>${itemsDesc}</td><td>${s.total.toFixed(2)}</td><td>${s.user||''}</td>`;
+            const actionsTd = document.createElement('td');
+            if (s.status === 'voided') {
+                actionsTd.innerHTML = `<span style="color:#9ca3af">Voided</span><div style="font-size:0.8rem;color:#6b7280">by: ${s.voided_by||''}<br/>${s.void_reason||''}</div>`;
+            } else {
+                actionsTd.innerHTML = `<button class="btn-danger" onclick="window.PharmacyModule.voidSale(${s.id})">Void/Refund</button>`;
+            }
+            tr.appendChild(actionsTd);
             tbody.appendChild(tr);
         });
+        const thead = document.querySelector('thead tr');
+        if (thead && !thead.querySelector('.actions-header')) {
+            const th = document.createElement('th'); th.className = 'actions-header'; th.textContent = 'Actions'; thead.appendChild(th);
+        }
+    }
+
+    // Void a sale: mark as voided and restock items
+    async voidSale(id) {
+        const res = await window.UI.confirm({ title: 'Void/Refund Sale', message: 'Void/refund this sale? This will keep the record and restock items.', placeholder: 'Reason (optional)', confirmText: 'Void/Refund', cancelText: 'Cancel', allowInput: true });
+        if (!res || !res.confirmed) return;
+        const reason = res.input || '';
+        const sale = window.Store.voidItem(this.salesKey, id, reason);
+        if (!sale) { alert('Sale not found'); return; }
+
+        // Restock items
+        const stock = window.Store.get(this.stockKey) || [];
+        sale.items.forEach(si => {
+            const st = stock.find(x => x.id === si.itemId);
+            if (st) st.qty = (st.qty || 0) + (si.qty || 0);
+        });
+        window.Store.set(this.stockKey, stock);
+
+        window.Store.logActivity('Void-Reverse', 'pharmacy', `Voided sale id=${id}`);
+        this.initRecords();
+        this.renderStockList();
+        alert('Sale voided and items restocked. Audit trail recorded.');
     }
 }
 window.PharmacyModule = new PharmacyModule();

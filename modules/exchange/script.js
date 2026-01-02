@@ -21,8 +21,8 @@ class ExchangeModule {
 
         const curVol = {}; // { USD: 0, EUR: 0 }
 
-        // existing buy/sell stats
-        const stats = { buy: { USD: 0, EUR: 0, GBP: 0 }, sell: { USD: 0, EUR: 0, GBP: 0 } };
+        // existing buy/sell stats (track per-currency dynamically)
+        const stats = { buy: {}, sell: {} };
 
         // Profit Logic: Track Weighted Avg Buy Rate
         // Prefer lot-based holdings if available (storedHoldings)
@@ -44,7 +44,7 @@ class ExchangeModule {
                 if (!lotsByCur[tx.currency]) lotsByCur[tx.currency] = [];
                 if (tx.type === 'buy') {
                     lotsByCur[tx.currency].push({ amount: tx.amount, rate: tx.rate, date: tx.date });
-                    if (stats.buy[tx.currency] !== undefined) stats.buy[tx.currency] += tx.amount;
+                    stats.buy[tx.currency] = (stats.buy[tx.currency] || 0) + tx.amount;
                 } else if (tx.type === 'sell') {
                     let remaining = tx.amount;
                     while (remaining > 0 && lotsByCur[tx.currency].length > 0) {
@@ -59,7 +59,7 @@ class ExchangeModule {
                         // sold more than known lots — assume zero cost for remainder
                         estimatedProfit += tx.rate * remaining;
                     }
-                    if (stats.sell[tx.currency] !== undefined) stats.sell[tx.currency] += tx.amount;
+                    stats.sell[tx.currency] = (stats.sell[tx.currency] || 0) + tx.amount;
                 }
             } else {
                 if (!holdings[tx.currency]) holdings[tx.currency] = { totalAmt: 0, totalCost: 0, avgRate: 0 };
@@ -72,7 +72,7 @@ class ExchangeModule {
                     h.avgRate = h.totalCost / h.totalAmt;
 
                     // Dashboard Stats
-                    if (stats.buy[tx.currency] !== undefined) stats.buy[tx.currency] += tx.amount;
+                    stats.buy[tx.currency] = (stats.buy[tx.currency] || 0) + tx.amount;
 
                 } else if (tx.type === 'sell') {
                     // Realize Profit
@@ -84,7 +84,7 @@ class ExchangeModule {
                     h.totalCost -= (tx.amount * costRate); // Reduce cost basis
 
                     // Dashboard Stats
-                    if (stats.sell[tx.currency] !== undefined) stats.sell[tx.currency] += tx.amount;
+                    stats.sell[tx.currency] = (stats.sell[tx.currency] || 0) + tx.amount;
                 }
             }
 
@@ -171,23 +171,32 @@ class ExchangeModule {
             }
 
             // when a currency is selected update rate input with current configured rate
-            currencySelect.addEventListener('change', () => {
-                const sel = currencySelect.value;
+            const amountEl = form.querySelector('input[name="amount"]');
+            const rateEl = form.querySelector('input[name="rate"]');
+            const totalEl = form.querySelector('input[name="total"]');
+
+            const updateRateFromConfig = (sel) => {
                 const cfg = (window.Store.get(this.ratesKey) || {})[sel] || {};
-                if (cfg) {
-                    // prefer explicit buy_rate/sell_rate depending on form type
-                    if (form.rate) form.rate.value = (type === 'buy' ? (cfg.buy_rate || cfg.rate) : (cfg.sell_rate || cfg.rate)) || '';
-                    // show configured badge if present
+                if (cfg && rateEl) {
+                    rateEl.value = (type === 'buy' ? (cfg.buy_rate || cfg.rate) : (cfg.sell_rate || cfg.rate)) || '';
                     const badge = document.getElementById('configured-rate-badge');
                     if (badge) badge.textContent = `Configured: ${((type==='buy'?cfg.buy_rate:cfg.sell_rate)||cfg.rate||0).toFixed(4)}`;
                 }
+                // recalc totals after programmatic rate change
+                if (typeof calc === 'function') calc();
+            };
+
+            currencySelect.addEventListener('change', () => {
+                updateRateFromConfig(currencySelect.value);
             });
 
             // set initial rate and badge
             const initCfg = (window.Store.get(this.ratesKey) || {})[currencySelect.value] || {};
-            if (initCfg && form.rate) form.rate.value = (type === 'buy' ? (initCfg.buy_rate || initCfg.rate) : (initCfg.sell_rate || initCfg.rate)) || '';
+            if (initCfg && rateEl) rateEl.value = (type === 'buy' ? (initCfg.buy_rate || initCfg.rate) : (initCfg.sell_rate || initCfg.rate)) || '';
             const badgeInit = document.getElementById('configured-rate-badge');
             if (badgeInit) badgeInit.textContent = `Configured: ${((type==='buy'?initCfg.buy_rate:initCfg.sell_rate)||initCfg.rate||0).toFixed(4)}`;
+            // ensure initial calc
+            if (typeof calc === 'function') setTimeout(() => { try { calc(); } catch(e){} }, 0);
         }
 
         // Rate edit permission: only admin can change the rate
@@ -216,6 +225,8 @@ class ExchangeModule {
                 rates[cur].updated = new Date().toISOString();
                 window.Store.set(this.ratesKey, rates);
                 const badge = document.getElementById('configured-rate-badge'); if (badge) badge.textContent = `Configured: ${newRate.toFixed(4)}`;
+                // ensure totals reflect programmatic/admin rate change
+                try { if (typeof calc === 'function') calc(); } catch (e) {}
             };
             rateInput.addEventListener('change', persistRate);
             rateInput.addEventListener('blur', persistRate);
@@ -223,17 +234,17 @@ class ExchangeModule {
 
         // Auto Calc
         const calc = () => {
-            const amt = parseFloat(form.amount.value) || 0;
-            const rate = parseFloat(form.rate.value) || 0;
-            form.total.value = (amt * rate).toFixed(2);
+            const amt = parseFloat((amountEl && amountEl.value) || 0) || 0;
+            const rate = parseFloat((rateEl && rateEl.value) || 0) || 0;
+            if (totalEl) totalEl.value = (amt * rate).toFixed(2);
         };
-        form.amount.addEventListener('input', calc);
-        form.rate.addEventListener('input', calc);
+        if (amountEl) amountEl.addEventListener('input', calc);
+        if (rateEl) rateEl.addEventListener('input', calc);
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const currency = form.currency.value;
-            const amount = parseFloat(form.amount.value);
+            const amount = parseFloat((amountEl && amountEl.value) || (form.amount && form.amount.value) || 0);
 
             if (type === 'sell') {
                 const transactions = window.Store.get(this.storeKey) || [];
@@ -256,7 +267,7 @@ class ExchangeModule {
                 id_card: form.id_card ? form.id_card.value : '',
                 currency: currency,
                 amount: amount,
-                rate: parseFloat(form.rate.value),
+                rate: parseFloat((rateEl && rateEl.value) || (form.rate && form.rate.value) || 0),
                 date: new Date().toISOString()
             };
 
@@ -296,7 +307,13 @@ class ExchangeModule {
                 if (tx) { tx.realized = realized; window.Store.set(this.storeKey, all); }
             }
 
-            alert('Transaction Saved!');
+            // Ask to print receipt
+            const all = window.Store.get(this.storeKey) || [];
+            const savedTx = all.find(t => t.id === (saved && saved.id)) || saved;
+            const pr = await window.UI.confirm({ title: 'Transaction Saved', message: 'Transaction saved. Print receipt?', confirmText: 'Print', cancelText: 'Close', allowInput: false });
+            if (pr && pr.confirmed) {
+                window.UI.printReceipt.transaction(savedTx || saved || data);
+            }
             form.reset();
         });
     }
@@ -399,8 +416,72 @@ class ExchangeModule {
                 <td>${tx.rate.toFixed(4)}</td>
                 <td>${(tx.amount * tx.rate).toFixed(2)}</td>
             `;
+            // Actions column
+            const actionsTd = document.createElement('td');
+            if (tx.status === 'voided') {
+                actionsTd.innerHTML = `<span style="color:#9ca3af;">Voided</span><div style="font-size:0.8rem;color:#6b7280">by: ${tx.voided_by||''}<br/>${tx.void_reason||''}</div>`;
+            } else {
+                actionsTd.innerHTML = `<button class="btn-danger" onclick="window.ExchangeModule.voidTransaction(${tx.id})">Void</button>`;
+            }
+            tr.appendChild(actionsTd);
             tbody.appendChild(tr);
         });
+        // Ensure table header has actions column (if present in DOM)
+        const thead = document.querySelector('thead tr');
+        if (thead && !thead.querySelector('.actions-header')) {
+            const th = document.createElement('th'); th.className = 'actions-header'; th.textContent = 'Actions'; thead.appendChild(th);
+        }
+    }
+
+    // Void a transaction: mark as voided and attempt to reverse holdings effects where possible
+    async voidTransaction(id) {
+        const res = await window.UI.confirm({ title: 'Void Transaction', message: 'Void this transaction? This will mark it as canceled but keep the record.', placeholder: 'Entry error', confirmText: 'Void', cancelText: 'Cancel', allowInput: true });
+        if (!res || !res.confirmed) return;
+        const reason = res.input || '';
+        const tx = window.Store.voidItem(this.storeKey, id, reason);
+        if (!tx) { alert('Transaction not found'); return; }
+
+        // Attempt to reverse holdings adjustments
+        const holdings = window.Store.get(this.holdingsKey) || {};
+        holdings[tx.currency] = holdings[tx.currency] || { lots: [] };
+
+        if (tx.type === 'buy') {
+            // Remove lot corresponding to this buy (match by date/rate/amount if possible)
+            let remaining = tx.amount;
+            // Try to find exact lot
+            const idx = holdings[tx.currency].lots.findIndex(l => l.amount === tx.amount && l.rate === tx.rate && l.date === tx.date);
+            if (idx !== -1) {
+                holdings[tx.currency].lots.splice(idx, 1);
+            } else {
+                // Otherwise, remove amount from the end (most recent) lots
+                for (let i = holdings[tx.currency].lots.length - 1; i >= 0 && remaining > 0; i--) {
+                    const lot = holdings[tx.currency].lots[i];
+                    if (lot.amount <= remaining) {
+                        remaining -= lot.amount; holdings[tx.currency].lots.splice(i, 1);
+                    } else {
+                        lot.amount -= remaining; remaining = 0;
+                    }
+                }
+            }
+        } else if (tx.type === 'sell') {
+            // For sell reversal, if realized lot info exists, re-add those amounts back as lots
+            if (tx.realized && Array.isArray(tx.realized)) {
+                tx.realized.forEach(r => {
+                    holdings[tx.currency].lots.unshift({ amount: r.amount, rate: r.buy_rate || r.rate || 0, date: new Date().toISOString() });
+                });
+            } else {
+                // If no realized info, conservatively add a lot equal to amount at tx.rate (best-effort)
+                holdings[tx.currency].lots.unshift({ amount: tx.amount, rate: tx.rate || 0, date: new Date().toISOString() });
+            }
+        }
+
+        window.Store.set(this.holdingsKey, holdings);
+        window.Store.logActivity('Void-Reverse', 'exchange', `Reversed holdings for tx id=${id}`);
+
+        // Re-render views
+        this.initRecords();
+        this.initStock();
+        alert('Transaction voided. Audit trail retained.');
     }
     initStock() {
         const transactions = window.Store.get(this.storeKey) || [];
