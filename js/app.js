@@ -12,6 +12,7 @@ class App {
     init() {
         if (!this.currentUser) return;
 
+        this.initTheme();
         this.renderSidebar();
         this.updateUserInfo();
 
@@ -24,6 +25,28 @@ class App {
         this.navigateTo(startView);
 
         document.getElementById('logoutBtn').addEventListener('click', () => window.Auth.logout());
+
+        const themeBtn = document.getElementById('themeToggle');
+        if (themeBtn) themeBtn.addEventListener('click', () => this.toggleTheme());
+    }
+
+    initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        this.updateThemeIcon(savedTheme);
+    }
+
+    toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        this.updateThemeIcon(next);
+    }
+
+    updateThemeIcon(theme) {
+        const btn = document.getElementById('themeToggle');
+        if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
 
     updateUserInfo() {
@@ -69,6 +92,7 @@ class App {
                 roles: ['admin', 'construction_user'],
                 items: [
                     { id: 'construction-dashboard', label: 'Dashboard', icon: '🏗️' },
+                    { id: 'construction-sites', label: 'Manage Sites', icon: '📍', submenu: true },
                     { id: 'construction-expense', label: 'Log Expense', icon: '💸', submenu: true },
                     { id: 'construction-income', label: 'Log Income', icon: '💰', submenu: true },
                     { id: 'construction-records', label: 'Financials', icon: '📋', submenu: true }
@@ -76,27 +100,57 @@ class App {
             }
         ];
 
-        structure.forEach(section => {
-            if (this.hasAccess(section.roles)) {
-                // Section Header
-                if (section.header) {
-                    const liHead = document.createElement('li');
-                    liHead.className = 'menu-category';
-                    liHead.textContent = section.header;
-                    sidebar.appendChild(liHead);
-                }
+        // Create Dropdown for Sectors
+        const sectorContainer = document.createElement('div');
+        sectorContainer.style.padding = '1rem';
 
-                // Items
-                section.items.forEach(item => {
-                    const li = document.createElement('li');
-                    li.className = 'menu-item';
-                    if (item.submenu) li.classList.add('submenu-item'); // visual indent
-                    li.dataset.target = item.id;
-                    li.innerHTML = `<span class="icon">${item.icon}</span> ${item.label}`;
-                    li.onclick = () => this.navigateTo(item.id);
-                    sidebar.appendChild(li);
-                });
+        const select = document.createElement('select');
+        select.className = 'form-control';
+        select.onchange = (e) => this.renderSectorItems(e.target.value);
+
+        let firstAvailable = null;
+
+        structure.forEach((section, index) => {
+            if (this.hasAccess(section.roles)) {
+                if (firstAvailable === null) firstAvailable = index;
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = section.header;
+                select.appendChild(opt);
             }
+        });
+
+        sectorContainer.appendChild(select);
+
+        // Items Container
+        const itemsContainer = document.createElement('ul');
+        itemsContainer.id = 'sidebar-items-container';
+
+        sidebar.appendChild(sectorContainer);
+        sidebar.appendChild(itemsContainer);
+
+        // Store structure for re-rendering
+        this.menuStructure = structure;
+
+        // Initial Render
+        if (firstAvailable !== null) this.renderSectorItems(firstAvailable);
+    }
+
+    renderSectorItems(sectionIndex) {
+        const container = document.getElementById('sidebar-items-container');
+        if (!container || !this.menuStructure) return;
+
+        container.innerHTML = '';
+        const section = this.menuStructure[sectionIndex];
+
+        section.items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'menu-item';
+            if (item.submenu) li.classList.add('submenu-item');
+            li.dataset.target = item.id;
+            li.innerHTML = `<span class="icon">${item.icon}</span> ${item.label}`;
+            li.onclick = () => this.navigateTo(item.id);
+            container.appendChild(li);
         });
     }
 

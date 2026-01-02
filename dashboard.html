@@ -31,10 +31,12 @@
             <header class="topbar">
                 <h2 id="page-title">Dashboard</h2>
                 <div class="user-info">
-                    <span id="displayUsername" class="username">User</span>
-                    <span id="displayRole" class="role-badge">Role</span>
-                    <button id="logoutBtn" class="logout-btn">Logout</button>
-                </div>
+                    <div class="user-info">
+                        <button id="themeToggle" class="theme-toggle" title="Toggle Dark Mode">🌙</button>
+                        <span id="displayUsername" class="username">User</span>
+                        <span id="displayRole" class="role-badge">Role</span>
+                        <button id="logoutBtn" class="logout-btn">Logout</button>
+                    </div>
             </header>
 
             <!-- Content Body -->
@@ -197,7 +199,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="transaction-summary-body">
-                                    <tr><td colspan="4" class="empty-state">Loading...</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="empty-state">Loading...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -393,6 +397,10 @@
                         <h3>Log Material / Labor Expense</h3>
                         <form id="construction-expense-form">
                             <div class="form-group">
+                                <label>Project / Site</label>
+                                <select id="exp-site" required></select>
+                            </div>
+                            <div class="form-group">
                                 <label>Description</label>
                                 <input type="text" id="exp-desc" required>
                             </div>
@@ -413,6 +421,10 @@
                     <div class="form-container card">
                         <h3>Log Rent / Income</h3>
                         <form id="construction-income-form">
+                            <div class="form-group">
+                                <label>Project / Site</label>
+                                <select id="inc-site" required></select>
+                            </div>
                             <div class="form-group">
                                 <label>Source / Unit</label>
                                 <input type="text" id="inc-desc" required>
@@ -444,6 +456,29 @@
                             </thead>
                             <tbody id="construction-records-body"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <div id="view-construction-sites" class="view-section hidden">
+                    <h3>Manage Sites</h3>
+                    <div class="action-bar">
+                        <button class="btn-primary" onclick="window.ConstructionModule.openAddSiteModal()">+ Add New
+                            Site</button>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="card" style="grid-column: 1 / -1;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Site Name</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="construction-sites-body">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 

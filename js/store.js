@@ -20,7 +20,8 @@ const INIT_KEYS = {
     ],
     'pharmacy_sales': [],
     'construction_expenses': [],
-    'construction_income': []
+    'construction_income': [],
+    'construction_sites': []
 };
 
 class Store {
