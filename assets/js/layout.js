@@ -194,6 +194,7 @@ class Layout {
         topbar.innerHTML = `
             <div class="page-title"><button id="navToggle" class="burger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button><h2>${pageTitle}</h2></div>
             <div class="user-info">
+                <button id="notificationBtn" class="notification-btn" title="Notifications">🔔 <span id="notificationCount" class="notification-count" style="display:none;">0</span></button>
                 <span class="username">${user.name || 'User'}</span>
                 <span class="role-badge">${roleLabel}</span>
                 <button id="logoutBtn" class="logout-btn">Logout</button>
@@ -244,6 +245,103 @@ class Layout {
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+
+        // Notification system
+        this.initNotifications();
+    }
+
+    initNotifications() {
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationCount = document.getElementById('notificationCount');
+        if (!notificationBtn) return;
+
+        // Create notification dropdown
+        const dropdown = document.createElement('div');
+        dropdown.id = 'notificationDropdown';
+        dropdown.style.cssText = `
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        `;
+        document.body.appendChild(dropdown);
+
+        // Toggle dropdown
+        notificationBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = dropdown.style.display === 'block';
+            dropdown.style.display = isVisible ? 'none' : 'block';
+        });
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && e.target !== notificationBtn) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Load notifications
+        this.loadNotifications(dropdown, notificationCount);
+    }
+
+    loadNotifications(dropdown, countEl) {
+        const user = JSON.parse(sessionStorage.getItem('active_user') || '{}');
+        const userRole = user.role;
+
+        // All possible notifications with business categories
+        const allNotifications = [
+            { type: 'warning', message: 'Low stock alert: Paracetamol (5 units remaining)', time: '2 hours ago', business: 'pharmacy' },
+            { type: 'info', message: 'Construction project "Project A" deadline approaching in 3 days', time: '5 hours ago', business: 'construction' },
+            { type: 'alert', message: 'Currency rate fluctuation: USD/INR changed by 2.5%', time: '1 day ago', business: 'exchange' },
+            { type: 'success', message: 'Monthly sales target achieved for Pharmacy', time: '2 days ago', business: 'pharmacy' },
+            { type: 'warning', message: 'Low stock alert: Aspirin (2 units remaining)', time: '4 hours ago', business: 'pharmacy' },
+            { type: 'info', message: 'Construction project "Project B" deadline approaching in 5 days', time: '6 hours ago', business: 'construction' },
+            { type: 'alert', message: 'Currency rate fluctuation: EUR/USD changed by 1.8%', time: '2 days ago', business: 'exchange' },
+            { type: 'success', message: 'Exchange monthly volume target exceeded', time: '3 days ago', business: 'exchange' }
+        ];
+
+        // Filter notifications based on user role
+        let notifications = [];
+        if (userRole === 'admin') {
+            // Admin sees all notifications
+            notifications = allNotifications;
+        } else if (userRole === 'exchange_user') {
+            // Exchange user sees only exchange notifications
+            notifications = allNotifications.filter(n => n.business === 'exchange');
+        } else if (userRole === 'pharmacy_user') {
+            // Pharmacy user sees only pharmacy notifications
+            notifications = allNotifications.filter(n => n.business === 'pharmacy');
+        } else if (userRole === 'construction_user') {
+            // Construction user sees only construction notifications
+            notifications = allNotifications.filter(n => n.business === 'construction');
+        }
+
+        dropdown.innerHTML = `
+            <div style="padding: 15px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">Notifications</div>
+            ${notifications.length > 0 ? notifications.map(n => `
+                <div style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer;" class="notification-item">
+                    <div style="font-size: 0.9rem; margin-bottom: 4px;">${n.message}</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">${n.time}</div>
+                </div>
+            `).join('') : '<div style="padding: 20px; text-align: center; color: #64748b;">No notifications</div>'}
+        `;
+
+        // Update count
+        const unreadCount = notifications.filter(n => n.type !== 'success').length; // Assume success are read
+        if (unreadCount > 0) {
+            countEl.textContent = unreadCount;
+            countEl.style.display = 'inline';
+        } else {
+            countEl.style.display = 'none';
+        }
     }
 
     highlightActivePage() {
